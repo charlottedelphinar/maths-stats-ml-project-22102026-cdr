@@ -1,29 +1,56 @@
 import numpy as np
 
 # Calculating Gini impurity
-def gini(y):
+def gini(y, sample_weight=None):
+    y = np.asarray(y)
+
     if len(y) == 0:
         return 0.0
 
-    p = np.mean(y)
-    return 1 - p**2 - (1 - p)**2
+    if sample_weight is None:
+        sample_weight = np.ones(len(y))
 
-# Calculating weighted Gini impurity
-def weighted_gini(y_left, y_right):
-    n_left = len(y_left)
-    n_right = len(y_right)
-    n = n_left + n_right
+    total_weight = np.sum(sample_weight)
 
-    if n == 0:
+    if total_weight == 0:
         return 0.0
 
-    return (n_left / n) * gini(y_left) + (n_right / n) * gini(y_right)
+    p = np.sum(sample_weight[y == 1]) / total_weight
+
+    return 1 - p**2 - (1 - p)**2
+
+
+# Calculating weighted Gini impurity
+def weighted_gini(y_left, y_right, w_left=None, w_right=None):
+    if w_left is None:
+        w_left = np.ones(len(y_left))
+
+    if w_right is None:
+        w_right = np.ones(len(y_right))
+
+    total_left = np.sum(w_left)
+    total_right = np.sum(w_right)
+    total = total_left + total_right
+
+    if total == 0:
+        return 0.0
+
+    return (
+        (total_left / total) * gini(y_left, w_left)
+        + (total_right / total) * gini(y_right, w_right)
+    )
+
 
 # Finding the best feature and threshold
-def best_split(X, y, min_samples_leaf=20):
+def best_split(X, y, min_samples_leaf=20, sample_weight=None):
+    if sample_weight is None:
+        sample_weight = np.ones(len(y))
+
+    sample_weight = np.asarray(sample_weight, dtype=float)
+
     best_feature = None
     best_threshold = None
-    best_score = gini(y)
+    best_score = gini(y, sample_weight)
 
     for j in range(X.shape[1]):
         values = np.unique(X[:, j])
@@ -42,10 +69,18 @@ def best_split(X, y, min_samples_leaf=20):
             left = X[:, j] <= t
             right = ~left
 
-            if left.sum() < min_samples_leaf or right.sum() < min_samples_leaf:
+            if (
+                left.sum() < min_samples_leaf
+                or right.sum() < min_samples_leaf
+            ):
                 continue
 
-            score = weighted_gini(y[left], y[right])
+            score = weighted_gini(
+                y[left],
+                y[right],
+                sample_weight[left],
+                sample_weight[right]
+            )
 
             if score < best_score - 1e-12:
                 best_score = score
@@ -54,14 +89,35 @@ def best_split(X, y, min_samples_leaf=20):
 
     return best_feature, best_threshold
 
-# Building the decision tree
-def build_tree(X, y, depth=0, max_depth=5, min_samples_leaf=20):
-    prediction = int(np.mean(y) >= 0.5)
 
-    if depth >= max_depth or gini(y) == 0:
+# Building the decision tree
+def build_tree(
+    X,
+    y,
+    depth=0,
+    max_depth=5,
+    min_samples_leaf=20,
+    sample_weight=None
+):
+    if sample_weight is None:
+        sample_weight = np.ones(len(y))
+
+    sample_weight = np.asarray(sample_weight, dtype=float)
+
+    weight_0 = np.sum(sample_weight[y == 0])
+    weight_1 = np.sum(sample_weight[y == 1])
+
+    prediction = int(weight_1 >= weight_0)
+
+    if depth >= max_depth or gini(y, sample_weight) <= 1e-12:
         return {"prediction": prediction}
 
-    j, t = best_split(X, y, min_samples_leaf)
+    j, t = best_split(
+        X,
+        y,
+        min_samples_leaf=min_samples_leaf,
+        sample_weight=sample_weight
+    )
 
     if j is None:
         return {"prediction": prediction}
@@ -72,9 +128,24 @@ def build_tree(X, y, depth=0, max_depth=5, min_samples_leaf=20):
     return {
         "feature": j,
         "threshold": t,
-        "left": build_tree(X[left], y[left], depth + 1, max_depth, min_samples_leaf),
-        "right": build_tree(X[right], y[right], depth + 1, max_depth, min_samples_leaf),
+        "left": build_tree(
+            X[left],
+            y[left],
+            depth + 1,
+            max_depth,
+            min_samples_leaf,
+            sample_weight[left]
+        ),
+        "right": build_tree(
+            X[right],
+            y[right],
+            depth + 1,
+            max_depth,
+            min_samples_leaf,
+            sample_weight[right]
+        ),
     }
+
 
 # Predicting one shopping session
 def predict_one(x, tree):
@@ -86,9 +157,11 @@ def predict_one(x, tree):
 
     return predict_one(x, tree["right"])
 
+
 # Predicting all shopping sessions
 def predict(X, tree):
     return np.array([predict_one(x, tree) for x in X])
+
 
 # Calculating classification results
 def evaluate(y, y_pred):
@@ -105,6 +178,7 @@ def evaluate(y, y_pred):
     print("Precision:", round(precision, 4))
     print("Recall:", round(recall, 4))
     print("F1-score:", round(f1, 4))
+
 
 # Checkpoints and training
 if __name__ == "__main__":
@@ -144,15 +218,25 @@ if __name__ == "__main__":
     y_val = y_val.to_numpy()
 
     # Training the decision tree
+    purchase_weight = np.sum(y_train == 0) / np.sum(y_train == 1)
+
+    sample_weight = np.where(
+        y_train == 1,
+        purchase_weight,
+        1.0
+    )
+
     tree = build_tree(
         X_train_ready,
         y_train,
         max_depth=5,
         min_samples_leaf=20,
+        sample_weight=sample_weight
     )
 
     print()
     print("OK - decision tree trained")
+    print("Purchase weight:", round(purchase_weight, 4))
 
     # Making predictions on validation data
     y_pred = predict(X_val_ready, tree)
