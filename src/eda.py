@@ -5,22 +5,31 @@ from pathlib import Path
 
 df = pd.read_csv("data/online_shoppers_intention.csv")  
 #1 Dimensions of the dataset
+print("Dimensions of the dataset:")
 print(df.shape)
 #2 First few rows
+print("First few rows:")
 print(df.head())
 #3 Data types
+print("Data types:")
 print(df.dtypes)
 #4 Missing values
+print("Missing values:")
 print(df.isna().sum())
 #5 Duplicated rows
+print("Duplicated rows:")
 print(df.duplicated().sum())
 #6 Purchases and non-purchases
+print("Purchases and non-purchases:")
 print(df["Revenue"].value_counts())
 #7 % of sessions that resulted in a purchase
+print("Percentage of sessions that resulted in a purchase:")
 print(round(df["Revenue"].mean() * 100, 2))
 #Descriptive statistics
+print("Descriptive statistics:")
 print(df.describe())
 #Bar chart of the target distribution
+print("Bar chart of the target distribution:")
 counts = df["Revenue"].value_counts().reindex(
     [False, True], fill_value=0
 )
