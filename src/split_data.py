@@ -1,5 +1,10 @@
+import os
 import numpy as np
 import pandas as pd
+
+# Choosing the feature set, PAGE_VALUES=1 adds the PageValues column as an experiment
+USE_PAGE_VALUES = os.environ.get("PAGE_VALUES", "0") == "1"
+TAG = "pagevalues" if USE_PAGE_VALUES else "strict"
 
 # Getting data from online_shoppers_intention, naming data
 data = pd.read_csv("data/online_shoppers_intention.csv")
@@ -23,6 +28,10 @@ features = [
     "VisitorType",
     "Weekend",
 ]
+
+# Adding PageValues only for the experiment
+if USE_PAGE_VALUES:
+    features.append("PageValues")
 
 # Separate inputs and target
 X = data[features]

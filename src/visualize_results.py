@@ -1,39 +1,49 @@
-import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
-# Getting the results from Part 6
-depths = [3, 5, 7]
+from src.split_data import TAG
 
-our_tree = [0.0000, 0.1683, 0.1732]
-sklearn_tree = [0.0000, 0.0934, 0.1102]
+# Getting the validation results saved by run_project
+table = pd.read_csv(f"results/validation_results_{TAG}.csv")
+ours = table[table["Model"] == "Our tree"]
+sklearn = table[table["Model"] == "Scikit-learn"]
 
-# Creating the graph
+# Finding the best F1 for each depth
+our_best = ours.groupby("Depth")["F1"].max()
+sklearn_best = sklearn.groupby("Depth")["F1"].max()
+
+# Creating the first graph
 plt.figure(figsize=(7, 4))
 
-# Plotting the results of both decision trees
-plt.plot(depths, our_tree, "o-", label="Our decision tree")
-plt.plot(depths, sklearn_tree, "o-", label="Scikit-learn")
+plt.plot(our_best.index, our_best.values, "o-", label="Our decision tree")
+plt.plot(sklearn_best.index, sklearn_best.values, "o-", label="Scikit-learn")
 
-# Adding labels and a title to the graph
 plt.xlabel("Maximum tree depth")
-plt.ylabel("F1-score")
-plt.title("Validation F1-score by Tree Depth")
-
-# Setting the values on the axes
-plt.xticks(depths)
-plt.ylim(0, 0.22)
-
-# Adding a legend to identify the models
+plt.ylabel("Best validation F1-score")
+plt.title("Validation F1-score by Tree Depth (" + TAG + ")")
 plt.legend()
-
-# Adjusting the graph layout
 plt.tight_layout()
+plt.savefig(f"results/model_comparison_{TAG}.png", dpi=150)
+plt.close()
 
-# Saving the graph in the results folder
-plt.savefig("results/model_comparison.png", dpi=150)
+# Creating the second graph with precision and recall of all our settings
+plt.figure(figsize=(6, 5))
 
-# Displaying the graph
-plt.show()
+scatter = plt.scatter(
+    ours["Recall"],
+    ours["Precision"],
+    c=ours["Purchase_weight"],
+    cmap="viridis",
+    s=25
+)
 
-# Confirming that the graph was saved
-print("Graph saved: results/model_comparison.png")
+plt.colorbar(scatter, label="Purchase weight")
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision and Recall of our tree (" + TAG + ")")
+plt.tight_layout()
+plt.savefig(f"results/precision_recall_{TAG}.png", dpi=150)
+plt.close()
+
+# Confirming that the graphs were saved
+print("Graphs saved in the results folder")
