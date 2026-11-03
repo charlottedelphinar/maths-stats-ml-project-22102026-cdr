@@ -19,7 +19,6 @@ def gini(y, sample_weight=None):
 
     return 1 - p**2 - (1 - p)**2
 
-
 # Calculating weighted Gini impurity
 def weighted_gini(y_left, y_right, w_left=None, w_right=None):
     if w_left is None:
@@ -39,7 +38,6 @@ def weighted_gini(y_left, y_right, w_left=None, w_right=None):
         (total_left / total) * gini(y_left, w_left)
         + (total_right / total) * gini(y_right, w_right)
     )
-
 
 # Finding the best feature and threshold
 def best_split(X, y, min_samples_leaf=20, sample_weight=None):
@@ -88,7 +86,6 @@ def best_split(X, y, min_samples_leaf=20, sample_weight=None):
                 best_threshold = t
 
     return best_feature, best_threshold
-
 
 # Building the decision tree
 def build_tree(
@@ -146,7 +143,6 @@ def build_tree(
         ),
     }
 
-
 # Predicting one shopping session
 def predict_one(x, tree):
     if "prediction" in tree:
@@ -157,11 +153,9 @@ def predict_one(x, tree):
 
     return predict_one(x, tree["right"])
 
-
 # Predicting all shopping sessions
 def predict(X, tree):
     return np.array([predict_one(x, tree) for x in X])
-
 
 # Calculating classification results
 def evaluate(y, y_pred):
@@ -178,7 +172,6 @@ def evaluate(y, y_pred):
     print("Precision:", round(precision, 4))
     print("Recall:", round(recall, 4))
     print("F1-score:", round(f1, 4))
-
 
 # Checkpoints and training
 if __name__ == "__main__":

@@ -58,7 +58,6 @@ print()
 print("First five shopping sessions:")
 print(X.head())
 
-
 # Show purchase distribution
 print()
 print("Purchases and non-purchases:")

@@ -35,7 +35,6 @@ def classification_metrics(y, y_pred):
         "F1": f1,
     }
 
-
 print()
 print("Feature set:", TAG)
 
@@ -108,7 +107,6 @@ for depth in depths:
                 **scores
             })
 
-
 # Saving all validation results
 table = pd.DataFrame(results)
 table.to_csv(f"results/validation_results_{TAG}.csv", index=False)
@@ -116,7 +114,6 @@ table.to_csv(f"results/validation_results_{TAG}.csv", index=False)
 print()
 print("Best 5 settings by F1 on validation:")
 print(table.sort_values("F1", ascending=False).head(5).round(4).to_string(index=False))
-
 
 # Selecting the best model from our decision tree
 our_results = table[table["Model"] == "Our tree"]
@@ -151,7 +148,6 @@ print()
 print("Selected models on validation:")
 print(selected.round(4).to_string(index=False))
 
-
 # Comparing with the baseline that never predicts a purchase
 baseline = np.zeros(len(y_val), dtype=int)
 baseline_scores = classification_metrics(y_val, baseline)
@@ -159,7 +155,6 @@ baseline_scores = classification_metrics(y_val, baseline)
 print()
 print("Baseline results:")
 print(pd.Series(baseline_scores).round(4))
-
 
 # Checkpoints
 assert len(table) == 2 * len(depths) * len(min_leaves) * len(purchase_weights)

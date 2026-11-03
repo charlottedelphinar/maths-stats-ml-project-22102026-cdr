@@ -52,9 +52,9 @@
 maths-stats-ml-project/
 ├── README.md                    this overview
 ├── requirements.txt             package versions
-├── description.py               dataset title print
 ├── run_experiments.sh           runs everything
 ├── compare_approaches.py        tree vs logistic vs network
+├── train_vs_test.py             train, validation, test gaps and split distribution
 ├── .gitignore
 │
 ├── data/

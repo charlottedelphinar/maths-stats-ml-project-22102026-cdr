@@ -59,7 +59,6 @@ y_train = y.iloc[train_idx]
 y_val = y.iloc[val_idx]
 y_test = y.iloc[test_idx]
 
-
 # Check the sizes of the three datasets
 assert len(X_train) == 7398
 assert len(X_val) == 2466

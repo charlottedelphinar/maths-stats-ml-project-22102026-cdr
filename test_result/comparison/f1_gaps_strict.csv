@@ -1,0 +1,10 @@
+Approach,Selected model,Test,Train,Validation,Gap train minus test,Gap validation minus test
+Decision tree,1 Plain model,0.2134,0.272,0.1939,0.0586,-0.0195
+Decision tree,2 Best F1,0.4214,0.4231,0.4354,0.0017,0.014
+Decision tree,"3 Max precision, recall of at least 0.5",0.4211,0.4313,0.4091,0.0102,-0.012
+Logistic regression,1 Plain model,0.0647,0.0956,0.0374,0.0309,-0.0273
+Logistic regression,2 Best F1,0.3891,0.3872,0.403,-0.0019,0.0139
+Logistic regression,"3 Max precision, recall of at least 0.5",0.4095,0.4098,0.3837,0.0003,-0.0257
+Neural network,1 Plain model,0.0819,0.1034,0.0764,0.0215,-0.0055
+Neural network,2 Best F1,0.3895,0.4,0.401,0.0105,0.0115
+Neural network,"3 Max precision, recall of at least 0.5",0.4008,0.4169,0.3817,0.0161,-0.0191

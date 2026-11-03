@@ -6,7 +6,7 @@ Every file name ends with `strict` (16 features, our main result) or `pagevalues
 |---|---|---|
 | `logistic_regression/` | `python -m logistic_regression.logreg_scratch` | validation grid, selected models, test results, 4 graphs |
 | `neural_network/` | `python -m neural_network.nn_scratch` | validation grid, selected models, test results, 4 graphs |
-| `comparison/` | `python -m compare_approaches` | decision tree, logistic regression and neural network side by side |
+| `comparison/` | `python -m compare_approaches`, `python -m train_vs_test` | three approaches side by side, confusion matrices, train vs test gaps, split distribution |
 
 The decision tree results stay in `results/` (made by `src/`). The older tree versions are in `old_decision_tree/`.
 

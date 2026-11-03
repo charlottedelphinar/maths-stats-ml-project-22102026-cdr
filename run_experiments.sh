@@ -31,6 +31,8 @@ PAGE_VALUES=1 python -m neural_network.nn_scratch
 
 # Comparing the three approaches
 python -m compare_approaches
+python -m train_vs_test
+PAGE_VALUES=1 python -m train_vs_test
 
 echo
 echo "Everything finished, see the results and test_result folders"

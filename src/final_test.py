@@ -14,7 +14,6 @@ from src.split_data import y_train, y_test, TAG
 y_train = y_train.to_numpy()
 y_test = y_test.to_numpy()
 
-
 # Training one model and testing it once
 def test_model(name, row):
     depth = int(row["Depth"])
@@ -84,7 +83,6 @@ def test_model(name, row):
          "Purchase_weight": purchase_weight, **sk_scores},
     ]
 
-
 # Testing the three selected models once
 results = []
 results += test_model("Equal weights", best_equal)
@@ -99,7 +97,6 @@ print()
 print("Final test comparison:")
 print(comparison[["Model", "Method", "Depth", "Min_leaf", "Purchase_weight",
                   "Accuracy", "Precision", "Recall", "F1"]].round(4).to_string(index=False))
-
 
 # Comparing with the baseline that never predicts a purchase
 baseline = np.zeros(len(y_test), dtype=int)

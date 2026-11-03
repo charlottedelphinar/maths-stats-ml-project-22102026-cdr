@@ -25,7 +25,6 @@ TARGET_RECALL = 0.50
 print()
 print("Logistic regression from scratch, feature set:", TAG)
 
-
 # Standardising with the training mean and standard deviation only
 def standardise(X_train, X_val, X_test):
     mean = X_train.mean(axis=0)
@@ -34,7 +33,6 @@ def standardise(X_train, X_val, X_test):
 
     return (X_train - mean) / std, (X_val - mean) / std, (X_test - mean) / std
 
-
 Ztr, Zva, Zte = standardise(X_train_ready, X_val_ready, X_test_ready)
 
 # Checkpoint
@@ -42,16 +40,13 @@ assert np.allclose(Ztr.mean(axis=0), 0)
 assert not np.allclose(Zva.mean(axis=0), 0)
 print("OK - standardisation uses the training mean")
 
-
 # Squashing the score into a probability
 def sigmoid(z):
     return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
 
-
 # Predicting the purchase probability
 def predict_proba(X, w, b):
     return sigmoid(X @ w + b)
-
 
 # Calculating the weighted cross entropy with an optional ridge penalty
 def cost_logistic(X, y, w, b, sample_weight=None, lam=0.0, eps=1e-12):
@@ -64,7 +59,6 @@ def cost_logistic(X, y, w, b, sample_weight=None, lam=0.0, eps=1e-12):
     loss = -(y * np.log(p) + (1 - y) * np.log(1 - p))
 
     return np.sum(sample_weight * loss) / m + lam / (2 * m) * (w @ w)
-
 
 # Calculating the gradient, prediction error times feature
 def gradient_logistic(X, y, w, b, sample_weight=None, lam=0.0):
@@ -80,7 +74,6 @@ def gradient_logistic(X, y, w, b, sample_weight=None, lam=0.0):
 
     return dw, db
 
-
 # Checking a gradient with finite differences
 def numerical_gradient(cost, X, y, w, b, h=1e-4):
     dw = np.zeros_like(w)
@@ -93,7 +86,6 @@ def numerical_gradient(cost, X, y, w, b, h=1e-4):
     db = (cost(X, y, w, b + h) - cost(X, y, w, b - h)) / (2 * h)
 
     return dw, db
-
 
 # Checkpoint, the cost of the all zero model is log 2
 J0 = cost_logistic(Ztr, y_train, np.zeros(Ztr.shape[1]), 0.0)
@@ -115,7 +107,6 @@ rel = np.linalg.norm(np.r_[dw - dw_num, db - db_num]) / np.linalg.norm(np.r_[dw_
 assert rel < 1e-6
 print("OK - gradient, relative error", f"{rel:.1e}")
 
-
 # Running gradient descent
 def gradient_descent(X, y, cost, gradient, alpha=0.1, n_iters=1000):
     w, b = np.zeros(X.shape[1]), 0.0
@@ -128,7 +119,6 @@ def gradient_descent(X, y, cost, gradient, alpha=0.1, n_iters=1000):
         history.append(cost(X, y, w, b))
 
     return w, b, np.array(history)
-
 
 # Training one model with a safe learning rate, alpha = 1 / L
 def train_model(X, y, purchase_weight, lam, n_iters=2000):
@@ -143,13 +133,11 @@ def train_model(X, y, purchase_weight, lam, n_iters=2000):
 
     return gradient_descent(X, y, cost, gradient, alpha=1 / L, n_iters=n_iters)
 
-
 # Checkpoint, the cost should go down at every step
 w_check, b_check, hist_check = train_model(Ztr, y_train, 3.0, 10.0, n_iters=300)
 assert hist_check[-1] < hist_check[0]
 assert np.all(np.diff(hist_check) <= 1e-9)
 print("OK - gradient descent lowers the cost at every step")
-
 
 # Calculating classification results from probabilities
 def classification_metrics(y_true, p_hat, threshold=0.5):
@@ -170,14 +158,12 @@ def classification_metrics(y_true, p_hat, threshold=0.5):
 
     return scores, counts
 
-
 # Checkpoint
 scores_check, counts_check = classification_metrics(
     np.array([0, 0, 1, 1.0]), np.array([0.1, 0.9, 0.9, 0.1])
 )
 assert np.isclose(scores_check["Precision"], 0.5) and np.isclose(scores_check["Recall"], 0.5)
 print("OK - classification metrics")
-
 
 # Searching weights, ridge strength and thresholds on validation data
 purchase_ratio = float(np.sum(y_train == 0) / np.sum(y_train == 1))
@@ -208,7 +194,6 @@ validation_table = pd.DataFrame(records)
 validation_table.to_csv(OUT / f"validation_results_{TAG}.csv", index=False)
 print("Configurations tested on validation:", len(validation_table))
 
-
 # Selecting the models using validation data only
 equal_row = validation_table[
     np.isclose(validation_table["Purchase_weight"], 1.0)
@@ -236,7 +221,6 @@ selected.to_csv(OUT / f"selected_models_{TAG}.csv", index=False)
 print()
 print("Selected models on validation:")
 print(selected.round(4).to_string(index=False))
-
 
 # Testing the selected models once and comparing with scikit-learn
 results = []
@@ -283,14 +267,12 @@ print("Final test results:")
 print(test_table[["Model", "Method", "Purchase_weight", "Lambda", "Threshold",
                   "Accuracy", "Precision", "Recall", "F1"]].round(4).to_string(index=False))
 
-
 # Comparing with the baseline that never predicts a purchase
 baseline_scores, _ = classification_metrics(y_test, np.zeros(len(y_test)))
 
 print()
 print("Baseline test results:")
 print({k: round(float(v), 4) for k, v in baseline_scores.items()})
-
 
 # Creating graph 1, precision and recall for each threshold on validation data
 chosen_w = float(best_precision_row["Purchase_weight"])

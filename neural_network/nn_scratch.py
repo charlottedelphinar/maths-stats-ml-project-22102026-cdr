@@ -30,7 +30,6 @@ TARGET_RECALL = 0.50
 print()
 print("Neural network from scratch, feature set:", TAG)
 
-
 # Standardising with the training mean and standard deviation only
 def standardise(X_train, X_val, X_test):
     mean = X_train.mean(axis=0)
@@ -39,7 +38,6 @@ def standardise(X_train, X_val, X_test):
 
     return (X_train - mean) / std, (X_val - mean) / std, (X_test - mean) / std
 
-
 Ztr, Zva, Zte = standardise(X_train_ready, X_val_ready, X_test_ready)
 
 # Checkpoint
@@ -47,11 +45,9 @@ assert np.allclose(Ztr.mean(axis=0), 0)
 assert not np.allclose(Zva.mean(axis=0), 0)
 print("OK - standardisation uses the training mean")
 
-
 # Squashing the score into a probability
 def sigmoid(z):
     return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
-
 
 # Starting the network, one hidden layer of tanh units and one sigmoid output
 def init_params(n_features, n_hidden, seed=42):
@@ -65,7 +61,6 @@ def init_params(n_features, n_hidden, seed=42):
 
     return [W1, b1, w2, b2]
 
-
 # Running the forward pass
 def forward(X, params):
     W1, b1, w2, b2 = params
@@ -74,11 +69,9 @@ def forward(X, params):
 
     return A1, p
 
-
 # Predicting the purchase probability
 def predict_proba(X, params):
     return forward(X, params)[1]
-
 
 # Calculating the weighted cross entropy with an optional ridge penalty
 def cost_nn(X, y, params, sample_weight=None, lam=0.0, eps=1e-12):
@@ -93,7 +86,6 @@ def cost_nn(X, y, params, sample_weight=None, lam=0.0, eps=1e-12):
     W1, b1, w2, b2 = params
 
     return np.sum(sample_weight * loss) / m + lam / (2 * m) * (np.sum(W1 ** 2) + w2 @ w2)
-
 
 # Running the backward pass, the chain rule from the loss back to the weights
 def gradients_nn(X, y, params, sample_weight=None, lam=0.0):
@@ -116,7 +108,6 @@ def gradients_nn(X, y, params, sample_weight=None, lam=0.0):
 
     return [dW1, db1, dw2, db2]
 
-
 # Checking the gradients with finite differences on a small network
 def numerical_gradients(cost, params, h=1e-5):
     grads = []
@@ -135,7 +126,6 @@ def numerical_gradients(cost, params, h=1e-5):
         grads.append(grad)
 
     return grads
-
 
 # Checkpoint, comparing backpropagation with the numerical gradient
 rng = np.random.default_rng(0)
@@ -161,7 +151,6 @@ zero_params = init_params(Ztr.shape[1], 4)
 zero_params[2] = np.zeros(4)
 assert np.isclose(cost_nn(Ztr, y_train, zero_params), np.log(2))
 print("OK - initial cost is log 2")
-
 
 # Training the network with gradient descent and keeping the best validation cost
 def train_nn(X, y, Xv, yv, purchase_weight, n_hidden, lam, lr=0.1, n_iters=1500):
@@ -194,7 +183,6 @@ def train_nn(X, y, Xv, yv, purchase_weight, n_hidden, lam, lr=0.1, n_iters=1500)
 
     return best_params, np.array(history), best_iter
 
-
 # Calculating classification results from probabilities
 def classification_metrics(y_true, p_hat, threshold=0.5):
     y_pred = (p_hat >= threshold).astype(float)
@@ -214,7 +202,6 @@ def classification_metrics(y_true, p_hat, threshold=0.5):
 
     return scores, counts
 
-
 # Checkpoint
 scores_check, counts_check = classification_metrics(
     np.array([0, 0, 1, 1.0]), np.array([0.1, 0.9, 0.9, 0.1])
@@ -226,7 +213,6 @@ print("OK - classification metrics")
 _, hist_check, _ = train_nn(Ztr, y_train, Zva, y_val, 3.0, 8, 10.0, n_iters=50)
 assert hist_check[-1] < hist_check[0]
 print("OK - training lowers the cost")
-
 
 # Searching hidden units, weights, ridge strength and thresholds on validation data
 purchase_ratio = float(np.sum(y_train == 0) / np.sum(y_train == 1))
@@ -263,7 +249,6 @@ validation_table = pd.DataFrame(records)
 validation_table.to_csv(OUT / f"validation_results_{TAG}.csv", index=False)
 print("Configurations tested on validation:", len(validation_table))
 
-
 # Selecting the models using validation data only
 plain = validation_table[
     (validation_table["Hidden_units"] == 16)
@@ -292,7 +277,6 @@ selected.to_csv(OUT / f"selected_models_{TAG}.csv", index=False)
 print()
 print("Selected models on validation:")
 print(selected.round(4).to_string(index=False))
-
 
 # Testing the selected models once and comparing with scikit-learn
 results = []
@@ -345,14 +329,12 @@ print("Final test results:")
 print(test_table[["Model", "Method", "Hidden_units", "Purchase_weight", "Lambda",
                   "Threshold", "Accuracy", "Precision", "Recall", "F1"]].round(4).to_string(index=False))
 
-
 # Comparing with the baseline that never predicts a purchase
 baseline_scores, _ = classification_metrics(y_test, np.zeros(len(y_test)))
 
 print()
 print("Baseline test results:")
 print({k: round(float(v), 4) for k, v in baseline_scores.items()})
-
 
 # Creating graph 1, precision and recall for each threshold on validation data
 chosen = (int(best_precision_row["Hidden_units"]),
