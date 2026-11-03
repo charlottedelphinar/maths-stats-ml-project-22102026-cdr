@@ -1,5 +1,5 @@
 #!/bin/bash
-# Running the logistic regression and neural network experiments from the project root
+# Running the whole project from the project root
 set -e
 
 # Moving to the folder where this script is saved
@@ -10,9 +10,14 @@ if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate
 fi
 
+# Checking our decision tree with the small tests
+python -m src.tree_scratch
+
 # Running the strict feature set, this is the main result
+echo
 echo "===== Strict features ====="
 python -m src.final_test
+python -m src.visualize_results
 python -m logistic_regression.logreg_scratch
 python -m neural_network.nn_scratch
 
@@ -20,6 +25,7 @@ python -m neural_network.nn_scratch
 echo
 echo "===== With PageValues ====="
 PAGE_VALUES=1 python -m src.final_test
+PAGE_VALUES=1 python -m src.visualize_results
 PAGE_VALUES=1 python -m logistic_regression.logreg_scratch
 PAGE_VALUES=1 python -m neural_network.nn_scratch
 
@@ -27,4 +33,4 @@ PAGE_VALUES=1 python -m neural_network.nn_scratch
 python -m compare_approaches
 
 echo
-echo "Everything finished, see the test_result folder"
+echo "Everything finished, see the results and test_result folders"
